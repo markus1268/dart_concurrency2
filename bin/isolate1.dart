@@ -1,26 +1,38 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
 
-void mainApp() async {
-  var receivePort = ReceivePort();
-  await Isolate.spawn(entryPoint, receivePort.sendPort);
+Future<SendPort> initIsolate() async {
+  Completer completer = Completer<SendPort>();
+  var isolateToMainStream = ReceivePort();
 
-  // Receive the SendPort from the Isolate
-  SendPort sendPort = await receivePort.first;
+  isolateToMainStream.listen((data) {
+    if (data is SendPort) {
+      var mainToIsolateStream = data;
+      completer.complete(mainToIsolateStream);
+    } else {
+      print('[isolateToMainStream] $data');
+    }
+  });
 
-  // Send a message to the Isolate
-  sendPort.send('hello');
+  var myIsolateInstance =
+      await Isolate.spawn(myIsolate, isolateToMainStream.sendPort);
+  return completer.future;
 }
 
-// Entry point for your Isolate
-entryPoint(SendPort sendPort) async {
-  // Open the ReceivePort to listen for incoming messages (optional)
-  var port = ReceivePort();
+void myIsolate(SendPort isolateToMainStream) {
+  var mainToIsolateStream = ReceivePort();
+  isolateToMainStream.send(mainToIsolateStream.sendPort);
 
-  // Send messages to other Isolates
-  sendPort.send(port.sendPort);
+  mainToIsolateStream.listen((data) {
+    print('[mainToIsolateStream] $data');
+    exit(0);
+  });
 
-  // Listen for messages (optional)
-  await for (var data in port) {
-    // `data` is the message received.
-  }
+  isolateToMainStream.send('This is from myIsolate()');
+}
+
+void main() async {
+  var mainToIsolateStream = await initIsolate();
+  mainToIsolateStream.send('This is from main()');
 }
