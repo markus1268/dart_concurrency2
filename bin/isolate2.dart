@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 // Creating geek isolate
-Isolate geek;
+Isolate? geek;
 
 void start_geek_process() async {
 // port for isolate to receive messages.
@@ -32,7 +32,7 @@ void stop_geek_process() {
     stdout.writeln('--------------Stopping Isolate--------------');
 
     // Killing the isolate
-    geek.kill(priority: Isolate.immediate);
+    geek?.kill(priority: Isolate.immediate);
 
     // Setting the isolate to null
     geek = null;
@@ -44,7 +44,8 @@ void main() async {
   stdout.writeln('--------------Starting Isolate--------------');
 
 // Starting the isolate with start_geek_process
-  await start_geek_process();
+  //await start_geek_process();
+  start_geek_process();
   stdout.writeln('Press enter key to quit');
 
 // Whenever enter is hit the program is stopped

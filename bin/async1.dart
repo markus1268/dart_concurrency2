@@ -1,4 +1,4 @@
-void hello() async {
+Future<void> hello() async {
   print('Enter hello function...');
   await Future.delayed(Duration(seconds: 3),
       () => print('something exciting is going to happen here...'));

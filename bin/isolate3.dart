@@ -3,15 +3,15 @@ import 'dart:isolate';
 // The port of the new isolate
 // this port will be used to further
 // send messages to that isolate
-SendPort newIsolateSendPort;
+SendPort? newIsolateSendPort;
 
 // Instance of the new Isolate
-Isolate newIsolate;
+Isolate? newIsolate;
 
 // Method that launches a new isolate
 // and proceeds with the initial
 // hand-shaking
-void callerCreateIsolate() async {
+Future<void> callerCreateIsolate() async {
   // Local and temporary ReceivePort to retrieve
   // the new isolate's SendPort
   var receivePort = ReceivePort();
@@ -38,7 +38,7 @@ Future<String> sendReceive(String messageToBeSent) async {
   // We send the message to the Isolate, and also
   // tell the isolate which port to use to provide
   // any answer
-  newIsolateSendPort.send(CrossIsolatesMessage<String>(
+  newIsolateSendPort?.send(CrossIsolatesMessage<String>(
     sender: port.sendPort,
     message: messageToBeSent,
   ));
@@ -66,14 +66,14 @@ void callbackFunction(SendPort callerSendPort) {
     var newMessage = 'complemented string ' + incomingMessage.message;
 
     // Sends the outcome of the processing
-    incomingMessage.sender.send(newMessage);
+    incomingMessage.sender?.send(newMessage);
   });
 }
 
 // Helper class
 class CrossIsolatesMessage<T> {
-  final SendPort sender;
-  final T message;
+  final SendPort? sender;
+  final T? message;
 
   CrossIsolatesMessage({
     this.sender,
